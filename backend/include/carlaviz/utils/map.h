@@ -202,6 +202,13 @@ struct Pole {
   constexpr static std::string_view type_str = "pole";
 };
 
+struct DisengageWarning {
+  uint64_t id = 0;
+  std::vector<Point> vertices;
+  double height = 0;
+  constexpr static std::string_view type_str = "disengage_warning";
+};
+
 enum class TrafficLightStatus { RED = 0, YELLOW, GREEN, UNKNOWN };
 
 std::string TrafficLightStatusToString(TrafficLightStatus status);
