@@ -211,6 +211,8 @@ struct DisengageWarning {
 
 enum class TrafficLightStatus { RED = 0, YELLOW, GREEN, UNKNOWN };
 
+enum class DisengageWarningStatus { YELLOW = 0, RED, GREEN, UNKNOWN}; // TODO: UPDATE THIS
+
 std::string TrafficLightStatusToString(TrafficLightStatus status);
 
 struct TrafficLight {

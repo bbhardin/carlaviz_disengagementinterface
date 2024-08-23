@@ -114,7 +114,23 @@ class XVIZMetadataUpdater {
           .StyleClass("yellow", {{"fill_color", "#ffff00"}})
           .StyleClass("green", {{"fill_color", "#00ff00"}})
           .StyleClass("unknown", {{"fill_color", "#c0c0c0"}});
+      // disengagement Warning Objects
+      // .Stream("/automation/disengagewarnings/objects")
+      //   .template Category<xviz::StreamMetadata::PRIMITIVE>()
+      //   .Type(xviz::StreamMetadata::POLYGON)
+      //   .Coordinate(xviz::StreamMetadata::IDENTITY)
+      //   .StreamStyle(
+      //     {
+      //       {"extruded", true},
+      //       {"height", 0.1f}
+      //     })
+      //   .StyleClass("red", {{"fill_color", "#ff0000"}})
+      //   .StyleClass("yellow", {{"fill_color", "#ffff00"}})
+      //   .StyleClass("green", {{"fill_color", "#00ff00"}})
+      //   .StyleClass("unknown", {{"fill_color", "#c0c0c0"}});
       
+
+
     // add cameras
     auto& builder_after_adding_cameras = AddSensorStream(xviz::StreamMetadata::IMAGE
     , builder, camera_streams_.begin(), camera_streams_);
@@ -318,6 +334,7 @@ class XVIZTranslation
                  fmt::format("[{}]", fmt::join(orientation, ", "))});
     is_pose_set_ = true;
   }
+  
   void UpdateVehicleImpl(const std::string& object_id,
                          const std::vector<std::array<float, 3>>& vertices,
                          float height) {
@@ -387,6 +404,11 @@ class XVIZTranslation
     }
   }
 
+  void UpdateDisengageWarningImpl(uint64_t id, map::DisengageWarningStatus status) {
+    // TODO: IMPLEMENT
+  }
+
+
   void RemoveSensorImpl(sensor::SensorIDType sensor_id) {
     this->metadata_updater_.RemoveSensor(sensor_id);
   }
@@ -416,7 +438,6 @@ class XVIZTranslation
     }
 
     // record positions of disengagement warnings
-    // TODO
     for (const auto& disengage_warning : map.DisengageWarnings()) {
       disengage_warnings_.insert({disengage_warning.id, disengage_warning});
     }

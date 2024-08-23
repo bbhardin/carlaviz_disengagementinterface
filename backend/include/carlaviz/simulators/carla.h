@@ -178,6 +178,8 @@ class CarlaSimulator
         this->translation_.UpdateTrafficLight(
             actor->GetId(),
             FromCarlaTrafficLightState(traffic_light->GetState()));
+      } else if (actor->GetTypeId() == "automation.disengage_warning") {
+        // TODO: IMPLEMENT (MAYBE)
       } else if (utils::StartWith(actor->GetTypeId(), "sensor")) {
         // handle sensors
         if (!this->AddSensor(actor->GetId(), actor->GetTypeId())) {
@@ -484,6 +486,12 @@ class CarlaSimulator
       }
     }
 
+    // Get all the disengagement warnings from the lookup table and add them to the map
+    // TEST ADDING 5 WARNINGS. TODO: PULL THEM FROM A JSON FILE
+    for (int i = 0; i < 5; i++) {
+      AddDisengageWarning(i);
+    }
+
     for (const auto& env_obj : world.GetEnvironmentObjects(
              static_cast<uint8_t>(carla::rpc::CityObjectLabel::Any))) {
       switch (env_obj.type) {
@@ -584,6 +592,41 @@ class CarlaSimulator
       for (auto& point : new_traffic_light.lights.back().vertices) {
         point.ApplyScale(this->map_.Scale());
       }
+    }
+  }
+
+
+  void AddDisengageWarning(boost::shared_ptr<carla::client::Actor> actor) {
+
+    auto disengage_warning =
+        boost::dynamic_pointer_cast<carla::client::DisengageWarning>(actor);
+
+    map::DisengageWarning& new_disengage_warning =
+        this->map_.AddDisengageWarning(actor->GetId());
+
+    // add actual warnings
+    // for (const auto& bbx : traffic_light->GetLightBoxes()) {
+    //   auto world_vertices = bbx.GetLocalVertices();
+    //   auto height = bbx.extent.z * 2;
+    //   new_traffic_light.lights.emplace_back(height);
+    //   new_traffic_light.lights.back().vertices.emplace_back(world_vertices[0]);
+    //   new_traffic_light.lights.back().vertices.emplace_back(world_vertices[2]);
+    //   new_traffic_light.lights.back().vertices.emplace_back(world_vertices[6]);
+    //   new_traffic_light.lights.back().vertices.emplace_back(world_vertices[4]);
+    //   for (auto& point : new_traffic_light.lights.back().vertices) {
+    //     point.ApplyScale(this->map_.Scale());
+    //   }
+    // }
+
+    //auto world_vertices = bbx.GetLocalVertices();
+    //auto height = bbx.extent.z * 2;
+    new_disengage_warning.emplace_back(height);
+    new_disengage_warning.back().vertices.emplace_back(world_vertices[0]);
+    new_disengage_warning.back().vertices.emplace_back(world_vertices[2]);
+    new_disengage_warning.back().vertices.emplace_back(world_vertices[6]);
+    new_disengage_warning.back().vertices.emplace_back(world_vertices[4]);
+    for (auto& point : new_disengage_warning.back().vertices) {
+      point.ApplyScale(this->map_.Scale());
     }
   }
 
