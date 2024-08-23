@@ -2,6 +2,7 @@ find_package(gflags REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(fmt REQUIRED)
 
+
 add_library(
   carlaviz
   ${CARLAVIZ_SOURCE_DIR}/src/utils/logging.cc

@@ -280,6 +280,10 @@ class Map {
     return traffic_lights_;
   }
 
+  const std::vector<DisengageWarning>& DisengageWarnings() const {
+    return disengage_warnings_;
+  }
+
   void Reset() {
     name_.clear();
     scale_ = {1, 1, 1};

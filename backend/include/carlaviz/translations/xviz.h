@@ -414,6 +414,12 @@ class XVIZTranslation
     for (const auto& traffic_light : map.TrafficLights()) {
       traffic_lights_.insert({traffic_light.id, traffic_light});
     }
+
+    // record positions of disengagement warnings
+    // TODO
+    for (const auto& disengage_warning : map.DisengageWarnings()) {
+      disengage_warnings_.insert({disengage_warning.id, disengage_warning});
+    }
   }
 
   void ResetImpl() {
@@ -428,6 +434,7 @@ class XVIZTranslation
   bool is_time_set_ = false;
 
   std::unordered_map<uint64_t, map::TrafficLight> traffic_lights_;
+  std::unordered_map<uint64_t, map::DisengageWarning> disengage_warnings_;
 };
 
 }  // namespace carlaviz::translations

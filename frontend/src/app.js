@@ -193,7 +193,7 @@ class CarlaViz extends PureComponent {
         <div id="control-panel">
           <div id="github">
             <p>
-              <a href="https://github.com/mjxu96/carlaviz" target="_blank">
+              <a href="https://github.com/mjxu96/carlaviz"  style={{"font-family":"Arial"}} target="_blank">
                 CarlaViz
               </a>
             </p>
@@ -243,13 +243,14 @@ class CarlaViz extends PureComponent {
             />
             {metadataReceived ? (
               <div id="hud">
-                <MeterWidget
+                {/* Hide the acceleration widget */}
+                {/* <MeterWidget
                   log={log}
                   streamName="/vehicle/acceleration"
                   label="Acceleration"
                   min={-10}
                   max={10}
-                />
+                /> */}
                 <hr />
                 <MeterWidget
                   log={log}
@@ -266,7 +267,7 @@ class CarlaViz extends PureComponent {
           </div>
         </div>
         <div id="author-info">
-          <p>Author: Minjun Xu</p>
+          {/* <p>Author: Minjun Xu</p> */}
         </div>
       </div>
     );
