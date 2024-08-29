@@ -113,21 +113,34 @@ class XVIZMetadataUpdater {
           .StyleClass("red", {{"fill_color", "#ff0000"}})
           .StyleClass("yellow", {{"fill_color", "#ffff00"}})
           .StyleClass("green", {{"fill_color", "#00ff00"}})
-          .StyleClass("unknown", {{"fill_color", "#c0c0c0"}});
-      // disengagement Warning Objects
-      // .Stream("/automation/disengagewarnings/objects")
-      //   .template Category<xviz::StreamMetadata::PRIMITIVE>()
-      //   .Type(xviz::StreamMetadata::POLYGON)
-      //   .Coordinate(xviz::StreamMetadata::IDENTITY)
-      //   .StreamStyle(
-      //     {
-      //       {"extruded", true},
-      //       {"height", 0.1f}
-      //     })
-      //   .StyleClass("red", {{"fill_color", "#ff0000"}})
-      //   .StyleClass("yellow", {{"fill_color", "#ffff00"}})
-      //   .StyleClass("green", {{"fill_color", "#00ff00"}})
-      //   .StyleClass("unknown", {{"fill_color", "#c0c0c0"}});
+          .StyleClass("unknown", {{"fill_color", "#c0c0c0"}})
+      // disengagement warning objects
+      .Stream("/automation/disengage_warnings")
+        .template Category<xviz::StreamMetadata::PRIMITIVE>()
+        .Type(xviz::StreamMetadata::POLYGON)
+        .Coordinate(xviz::StreamMetadata::IDENTITY)
+        .StreamStyle(
+          {
+            {"extruded", true},
+            {"height", 0.1f}
+          })
+        .StyleClass("red", {{"fill_color", "#ff0000"}})
+        .StyleClass("yellow", {{"fill_color", "#ffff00"}})
+        .StyleClass("green", {{"fill_color", "#00ff00"}})
+        .StyleClass("unknown", {{"fill_color", "#c0c0c0"}})
+      .Stream("/object/disengage_warning")
+        .template Category<xviz::StreamMetadata::PRIMITIVE>()
+        .Type(xviz::StreamMetadata::POLYGON)
+        .Coordinate(xviz::StreamMetadata::IDENTITY)
+        .StreamStyle(
+          {
+            {"extruded", true},
+            {"height", 0.1f}
+          })
+        .StyleClass("red", {{"fill_color", "#ff0000"}})
+        .StyleClass("yellow", {{"fill_color", "#ffff00"}})
+        .StyleClass("green", {{"fill_color", "#00ff00"}})
+        .StyleClass("unknown", {{"fill_color", "#c0c0c0"}});
       
 
 
@@ -154,6 +167,7 @@ class XVIZMetadataUpdater {
       .Container("Tables", xviz::LayoutType::HORIZONTAL)
         .TreeTable("Simulator Info", "Simulator Info", "/game/info", false)
         .TreeTable("Ego Vehicle Info", "Ego Vehicle Info", "/vehicle/info", false)
+        .TreeTable("Disengagements", "Disengagements", "/automation/disengage_warnings", false)
       .EndContainer()
     .UI("Metrics")
       .Container("Metrics", xviz::LayoutType::VERTICAL)
@@ -338,6 +352,7 @@ class XVIZTranslation
   void UpdateVehicleImpl(const std::string& object_id,
                          const std::vector<std::array<float, 3>>& vertices,
                          float height) {
+    // NOTE: This seems to be used for other vehicles, not the ego vehicle
     builder_.Primitive("/object/vehicle")
         .Polygon(vertices)
         .ID(object_id)
@@ -382,9 +397,10 @@ class XVIZTranslation
   void UpdateTrafficLightImpl(uint64_t id, map::TrafficLightStatus status) {
     auto traffic_lights_itr = traffic_lights_.find(id);
     if (traffic_lights_itr == traffic_lights_.end()) [[unlikely]] {
-      logging::LogError(
-          "Traffic lights {} was not created before, something must be wrong",
-          id);
+      // TODO: ADD BACK
+      // logging::LogError(
+      //     "Traffic lights {} was not created before, something must be wrong",
+      //     id);
       return;
     }
 
@@ -406,6 +422,21 @@ class XVIZTranslation
 
   void UpdateDisengageWarningImpl(uint64_t id, map::DisengageWarningStatus status) {
     // TODO: IMPLEMENT
+    auto disengage_warning_itr = disengage_warnings_.find(id);
+    // TODO: Error checking here
+    // logging::LogError(
+    //       "hello creating disengage warning",
+    //       id);
+
+   std::vector<std::array<float, 3>> test = {{0,0,0},{10,0,0},{10,10,0},{0,10,0}};
+   //,{0,1,1},{1,1,1},{1,0,1},{0,0,1}
+
+    builder_.Primitive("/automation/disengage_warnings")
+      .Polygon(test)
+      // .Polygon(map::PointsVectorToArrayVector(input)) // TODO: Not the correct way to get vertices
+      .Style({{"height", 10.0f}})
+      .Classes({DisengageWarningStatusToString(status)});
+      this->UpdatePose(0, {50, 0, 0}, {0, 0, 0}, 0, 0);
   }
 
 

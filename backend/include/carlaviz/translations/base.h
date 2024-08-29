@@ -90,6 +90,7 @@ class TranslationBase {
     return static_cast<DerivedTranslation*>(this)->UpdatePoseImpl(
         now, position, orientation, velocity, acceleration);
   }
+  
   void UpdateVehicle(const std::string& object_id,
                      const std::vector<std::array<float, 3>>& vertices,
                      float height) {
@@ -116,6 +117,11 @@ class TranslationBase {
 
   void UpdateTrafficLight(uint64_t id, map::TrafficLightStatus status) {
     return static_cast<DerivedTranslation*>(this)->UpdateTrafficLightImpl(
+        id, status);
+  }
+
+  void UpdateDisengageWarning(uint64_t id, map::DisengageWarningStatus status) {
+    return static_cast<DerivedTranslation*>(this)->UpdateDisengageWarningImpl(
         id, status);
   }
 

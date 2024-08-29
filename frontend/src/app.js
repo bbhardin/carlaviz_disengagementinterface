@@ -35,6 +35,8 @@ import {
 } from "streetscape.gl";
 import { Form, ThemeProvider } from "@streetscape.gl/monochrome";
 
+import DisengageWidget from "./disengage-widget";
+
 import { APP_SETTINGS, XVIZ_STYLE, CAR, UI_THEME } from "./constants";
 
 import githubIcon from "../public/github_icon.png";
@@ -176,6 +178,9 @@ class CarlaViz extends PureComponent {
     } else if (feature.properties.type === "plant") {
       return [0, 255, 255, 255];
     }
+    else if (feature.properties.type === "disengage_warning") {
+      return [255, 255, 0, 255];
+    }
     return [255, 255, 255, 255];
   };
 
@@ -191,7 +196,7 @@ class CarlaViz extends PureComponent {
     return (
       <div id="container">
         <div id="control-panel">
-          <div id="github">
+          {/* <div id="github">
             <p>
               <a href="https://github.com/mjxu96/carlaviz"  style={{"font-family":"Arial"}} target="_blank">
                 CarlaViz
@@ -200,7 +205,7 @@ class CarlaViz extends PureComponent {
             <a href="https://github.com/mjxu96/carlaviz" target="_blank">
               <img src={githubIcon}></img>
             </a>
-          </div>
+          </div> */}
           {metadataReceived ? (
             <div>
               <hr id="github-hr" />
@@ -251,6 +256,12 @@ class CarlaViz extends PureComponent {
                   min={-10}
                   max={10}
                 /> */}
+                <DisengageWidget
+                  log={log}
+                  streamName="/automation/disengage_warning"
+                  style="yellow"
+                  label="Warning: Disengagement previously reported here"
+                />
                 <hr />
                 <MeterWidget
                   log={log}

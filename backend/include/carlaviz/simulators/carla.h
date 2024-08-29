@@ -119,6 +119,9 @@ class CarlaSimulator
   std::unordered_map<SensorIDType, std::deque<sensor::LidarPointsWithTimestamp>>
       lidar_points_;
 
+  // Hold all the disengagement warnings
+  std::unordered_map<int, map::DisengageWarning> disengage_warnings_;
+
   void CheckAndLoadMap(const carla::client::World& world) {
     auto carla_map = world.GetMap();
     if (carla_map->GetName() != this->map_.Name()) {
@@ -179,7 +182,21 @@ class CarlaSimulator
             actor->GetId(),
             FromCarlaTrafficLightState(traffic_light->GetState()));
       } else if (actor->GetTypeId() == "automation.disengage_warning") {
+          // logging::LogError(
+          //     "have found disengage warnings and plan to update them");
         // TODO: IMPLEMENT (MAYBE)
+        // auto traffic_light =
+        //     boost::dynamic_pointer_cast<carla::client::TrafficLight>(actor);
+        // if (!traffic_light) {
+        //   logging::LogError(
+        //       "Game actor of id {} has type id of traffic light but cannot be "
+        //       "downcast to TrafficLight object, something must be wrong!",
+        //       actor->GetId());
+        //   continue;
+        // }
+        // this->translation_.UpdateTrafficLight(
+        //     actor->GetId(),
+        //     FromCarlaTrafficLightState(traffic_light->GetState()));
       } else if (utils::StartWith(actor->GetTypeId(), "sensor")) {
         // handle sensors
         if (!this->AddSensor(actor->GetId(), actor->GetTypeId())) {
@@ -221,6 +238,13 @@ class CarlaSimulator
           }
         }
       }
+    }
+
+    // Update the disengagement warnings we've added to the scene
+    for (int i = 0; i < 5; i++) {
+      // NOTE THIS does log so it's working
+      //logging::LogError("all of the warnings", i);
+      this->translation_.UpdateDisengageWarning(i, map::DisengageWarningStatus::YELLOW);
     }
 
     this->ClearRemovedSensors();
@@ -472,28 +496,42 @@ class CarlaSimulator
 
   void AddEnvironmentObjects(const carla::client::World& world,
                              const carla::client::Map& map) {
-    auto actor_snapshots =
-        world.WaitForTick(std::chrono::seconds(this->option_.timeout_seconds));
-    for (const auto& actor_snapshot : actor_snapshots) {
-      auto actor = world.GetActor(actor_snapshot.id);
-      if (!actor) {
-        continue;
-      }
-      if (actor->GetTypeId() == "traffic.stop") {
-        AddStopSign(actor, map);
-      } else if (actor->GetTypeId() == "traffic.traffic_light") {
-        AddTrafficLight(actor);
-      }
-    }
 
+    logging::LogError(
+        "about to add the disengage warnings");
+
+    // Disengage warning is not part of the CARLA environment directly, so we add it afterwards
     // Get all the disengagement warnings from the lookup table and add them to the map
     // TEST ADDING 5 WARNINGS. TODO: PULL THEM FROM A JSON FILE
     for (int i = 0; i < 5; i++) {
       AddDisengageWarning(i);
     }
+    
+    auto actor_snapshots =
+        world.WaitForTick(std::chrono::seconds(this->option_.timeout_seconds));
+    logging::LogError(
+        "43about to add the env objects");
+    for (const auto& actor_snapshot : actor_snapshots) {
+      // auto actor = world.GetActor(actor_snapshot.id);
+      // if (!actor) {
+      //   continue;
+      // }
+      // if (actor->GetTypeId() == "traffic.stop") {
+      //   AddStopSign(actor, map);
+      // } else if (actor->GetTypeId() == "traffic.traffic_light") {
+      //   AddTrafficLight(actor);
+      // }
+    }
+
+    logging::LogError(
+        "23about to add the env objects");
 
     for (const auto& env_obj : world.GetEnvironmentObjects(
-             static_cast<uint8_t>(carla::rpc::CityObjectLabel::Any))) {
+             static_cast<uint8_t>(carla::rpc::CityObjectLabel::Any))) {  
+      if (!env_obj.name.empty()) {
+        // std::string test = env_obj.name + " adding env object";
+        // logging::LogError(test);
+      }
       switch (env_obj.type) {
         case carla::rpc::CityObjectLabel::Buildings:
           AddEnvironmentObject<map::Building>(env_obj);
@@ -507,10 +545,17 @@ class CarlaSimulator
           }
           break;
         default:
+          if (env_obj.name.find("Disengage_Warning") != std::string::npos) {
+            logging::LogError("We found a warning! ");
+            AddDisengageWarning(env_obj.id);
+            AddEnvironmentObject<map::DisengageWarning>(env_obj, 0.3);
+          }
           // not processing other types
           break;
       }
     }
+
+    logging::LogError("Added the env objs");
   }
 
   void AddStopSign(boost::shared_ptr<carla::client::Actor> stop_sign,
@@ -595,14 +640,34 @@ class CarlaSimulator
     }
   }
 
-
-  void AddDisengageWarning(boost::shared_ptr<carla::client::Actor> actor) {
-
-    auto disengage_warning =
-        boost::dynamic_pointer_cast<carla::client::DisengageWarning>(actor);
+  // void AddDisengageWarning(const carla::rpc::EnvironmentObject& warning) {
+  void AddDisengageWarning(int id) {
 
     map::DisengageWarning& new_disengage_warning =
-        this->map_.AddDisengageWarning(actor->GetId());
+        this->map_.AddDisengageWarning(id);
+    // new_disengage_warning.vertices.emplace_back({});
+    // this->disengage_warnings_.push_back(id, new_disengage_warning);
+    // for (auto& point :new_disengage_warning.vertices) {
+    //   point.ApplyScale(this->map_.Scale());
+    // }
+
+    // Add this new disengagement warning to the map
+    // auto& env_obj_in_map =
+    //     this->map_.template AddStaticObject<EnvironmentObjectType>(new_disengage_warning.id);
+    // //auto bbx_copy = new_disengage_warning.bounding_box; // This should not have been initialized yet since we aren't reading
+    //                                       // it from the town file. Alternatively, I could add it to the town file...
+    // // if constexpr (std::is_same_v<EnvironmentObjectType, map::Pole>) {
+    // //   ConstrainPoleTwoDimensions(bbx_copy.extent.x, bbx_copy.extent.y,
+    // //                              bbx_copy.extent.z, constraint);
+    // // }
+    // auto raw_vertices[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+    // env_obj_in_map.vertices.emplace_back(raw_vertices[0]);
+    // env_obj_in_map.vertices.emplace_back(raw_vertices[2]);
+    // env_obj_in_map.vertices.emplace_back(raw_vertices[6]);
+    // env_obj_in_map.vertices.emplace_back(raw_vertices[4]);
+    // env_obj_in_map.height = 0.1f * 2;
+    // logging::LogDebug("Added one static {} object id {}, name {}",
+    //                   env_obj_in_map.type_str, env_obj_in_map.id, "new disengage");
 
     // add actual warnings
     // for (const auto& bbx : traffic_light->GetLightBoxes()) {
@@ -620,14 +685,17 @@ class CarlaSimulator
 
     //auto world_vertices = bbx.GetLocalVertices();
     //auto height = bbx.extent.z * 2;
-    new_disengage_warning.emplace_back(height);
-    new_disengage_warning.back().vertices.emplace_back(world_vertices[0]);
-    new_disengage_warning.back().vertices.emplace_back(world_vertices[2]);
-    new_disengage_warning.back().vertices.emplace_back(world_vertices[6]);
-    new_disengage_warning.back().vertices.emplace_back(world_vertices[4]);
-    for (auto& point : new_disengage_warning.back().vertices) {
-      point.ApplyScale(this->map_.Scale());
-    }
+    
+    // Just wanting to add some test vertices of the warnings
+    // auto world_vertices = std::array<carla::geom::Location, 8>();
+    // new_disengage_warning.emplace_back(5);
+    // new_disengage_warning.back().vertices.emplace_back(world_vertices[0]);
+    // new_disengage_warning.back().vertices.emplace_back(world_vertices[2]);
+    // new_disengage_warning.back().vertices.emplace_back(world_vertices[6]);
+    // new_disengage_warning.back().vertices.emplace_back(world_vertices[4]);
+    // for (auto& point : new_disengage_warning.back().vertices) {
+    //   point.ApplyScale(this->map_.Scale());
+    // }
   }
 
   template <typename EnvironmentObjectType>

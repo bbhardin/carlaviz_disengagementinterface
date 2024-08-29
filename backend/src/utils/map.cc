@@ -105,6 +105,19 @@ std::string TrafficLightStatusToString(TrafficLightStatus status) {
   }
 }
 
+std::string DisengageWarningStatusToString(DisengageWarningStatus status) {
+  switch (status) {
+    case DisengageWarningStatus::RED:
+      return "red";
+    case DisengageWarningStatus::YELLOW:
+      return "yellow";
+    case DisengageWarningStatus::GREEN:
+      return "green";
+    default:
+      return "unknown";
+  }
+}
+
 std::vector<std::array<float, 3>> PointsVectorToArrayVector(
     const std::vector<Point>& input) {
   std::vector<std::array<float, 3>> out;

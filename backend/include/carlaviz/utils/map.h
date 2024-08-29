@@ -215,6 +215,8 @@ enum class DisengageWarningStatus { YELLOW = 0, RED, GREEN, UNKNOWN}; // TODO: U
 
 std::string TrafficLightStatusToString(TrafficLightStatus status);
 
+std::string DisengageWarningStatusToString(DisengageWarningStatus status);
+
 struct TrafficLight {
   struct Light {
     Light(float h) : height(h) {}
@@ -401,6 +403,13 @@ class Map {
       AddPolygonWithHeight(obj.vertices, obj.height, obj.type_str, json, idx);
       idx += 1;
     }
+
+    // add disengage warning
+    for (const auto& obj : static_objects_.template GetObjects<DisengageWarning>()) {
+      AddPolygonWithHeight(obj.vertices, obj.height, obj.type_str, json, idx);
+      idx += 1;
+    }
+
     return json;
   }
 
@@ -460,7 +469,7 @@ class Map {
   std::vector<TrafficLight> traffic_lights_;
   std::vector<DisengageWarning> disengage_warnings_;
 
-  detail::StaticObjectSelector<Building, Sidewalk, Pole, Plant> static_objects_;
+  detail::StaticObjectSelector<Building, Sidewalk, Pole, Plant, DisengageWarning> static_objects_;
 };
 
 }  // namespace carlaviz::map
