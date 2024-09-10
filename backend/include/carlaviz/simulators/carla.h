@@ -152,12 +152,37 @@ class CarlaSimulator
     for (const auto& actor_snapshot : world_snapshot) {
       auto actor = world.GetActor(actor_snapshot.id);
       logging::LogDebug("actor type: {}", actor->GetTypeId());
-      if (utils::StartWith(actor->GetTypeId(), "vehicle")) {
+      //logging::LogError("actor type: {}", actor->GetTypeId());
+      if (utils::StartWith(actor->GetTypeId(), "vehicle") || (actor->GetTypeId() == "harplab.dreyevr_vehicle.teslam3")) {
         // handle vehicles
+        //logging::LogError("Checking how close 111");
         if (IsEgoVehicle(*actor)) {
+          logging::LogError("Checking how close");
           this->translation_.UpdatePose(
               now, GetPosition(*actor), GetOrientation(*actor),
               actor->GetVelocity().Length(), actor->GetAcceleration().Length());
+            
+          // Check if ego vehicle is nearing disengage spot and we should display warning
+          auto ego_pos = GetPosition(*actor);
+          for (int i = 0; i < 5; i++) {
+            std::array<float, 3> disengage_pos = disengage_warnings_[i].global_coords;
+            float x_dif = ego_pos[0] - disengage_pos[0];
+            x_dif = pow(x_dif, 2);
+            float y_dif = ego_pos[1] - disengage_pos[1];
+            y_dif = pow(y_dif, 2);
+            float z_dif = ego_pos[2] - disengage_pos[2];
+            z_dif = pow(z_dif, 2);
+            if (sqrt(x_dif + y_dif + z_dif) < 5000) {
+              // We are near a disengagement warning! Let's log that!
+              logging::LogError("NEAR WARNING!");
+
+              this->translation_.UpdateDisengageWarning(i, true);
+            } else {
+              this->translation_.UpdateDisengageWarning(i, false);
+            }
+          }
+
+              
         } else {
           this->translation_.UpdateVehicle(actor->GetTypeId(),
                                            GetVerticesOfObject(*actor),
@@ -241,19 +266,19 @@ class CarlaSimulator
     }
 
     // Update the disengagement warnings we've added to the scene
-    for (int i = 0; i < 5; i++) {
-      // NOTE THIS does log so it's working
-      //logging::LogError("all of the warnings", i);
-      this->translation_.UpdateDisengageWarning(i, map::DisengageWarningStatus::YELLOW);
-    }
+    // for (int i = 0; i < 5; i++) {
+    //   // NOTE THIS does log so it's working
+    //   //logging::LogError("all of the warnings", i);
+    // }
 
     this->ClearRemovedSensors();
   }
 
   bool IsEgoVehicle(const carla::client::Actor& actor) {
     for (const auto& attribute : actor.GetAttributes()) {
+      // logging::LogError(attribute.GetId() + " hi " + attribute.GetValue());
       if (attribute.GetId() == "role_name" &&
-          (attribute.GetValue() == this->option_.ego_vehicle_name)) {
+          ((attribute.GetValue() == this->option_.ego_vehicle_name) || attribute.GetValue() == "hero")) {
         return true;
       }
     }
@@ -503,9 +528,9 @@ class CarlaSimulator
     // Disengage warning is not part of the CARLA environment directly, so we add it afterwards
     // Get all the disengagement warnings from the lookup table and add them to the map
     // TEST ADDING 5 WARNINGS. TODO: PULL THEM FROM A JSON FILE
-    for (int i = 0; i < 5; i++) {
-      AddDisengageWarning(i);
-    }
+    // for (int i = 0; i < 5; i++) {
+    //   AddDisengageWarning(i);
+    // }
     
     auto actor_snapshots =
         world.WaitForTick(std::chrono::seconds(this->option_.timeout_seconds));
@@ -547,7 +572,7 @@ class CarlaSimulator
         default:
           if (env_obj.name.find("Disengage_Warning") != std::string::npos) {
             logging::LogError("We found a warning! ");
-            AddDisengageWarning(env_obj.id);
+            //AddDisengageWarning(env_obj.id);
             AddEnvironmentObject<map::DisengageWarning>(env_obj, 0.3);
           }
           // not processing other types
@@ -645,57 +670,6 @@ class CarlaSimulator
 
     map::DisengageWarning& new_disengage_warning =
         this->map_.AddDisengageWarning(id);
-    // new_disengage_warning.vertices.emplace_back({});
-    // this->disengage_warnings_.push_back(id, new_disengage_warning);
-    // for (auto& point :new_disengage_warning.vertices) {
-    //   point.ApplyScale(this->map_.Scale());
-    // }
-
-    // Add this new disengagement warning to the map
-    // auto& env_obj_in_map =
-    //     this->map_.template AddStaticObject<EnvironmentObjectType>(new_disengage_warning.id);
-    // //auto bbx_copy = new_disengage_warning.bounding_box; // This should not have been initialized yet since we aren't reading
-    //                                       // it from the town file. Alternatively, I could add it to the town file...
-    // // if constexpr (std::is_same_v<EnvironmentObjectType, map::Pole>) {
-    // //   ConstrainPoleTwoDimensions(bbx_copy.extent.x, bbx_copy.extent.y,
-    // //                              bbx_copy.extent.z, constraint);
-    // // }
-    // auto raw_vertices[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-    // env_obj_in_map.vertices.emplace_back(raw_vertices[0]);
-    // env_obj_in_map.vertices.emplace_back(raw_vertices[2]);
-    // env_obj_in_map.vertices.emplace_back(raw_vertices[6]);
-    // env_obj_in_map.vertices.emplace_back(raw_vertices[4]);
-    // env_obj_in_map.height = 0.1f * 2;
-    // logging::LogDebug("Added one static {} object id {}, name {}",
-    //                   env_obj_in_map.type_str, env_obj_in_map.id, "new disengage");
-
-    // add actual warnings
-    // for (const auto& bbx : traffic_light->GetLightBoxes()) {
-    //   auto world_vertices = bbx.GetLocalVertices();
-    //   auto height = bbx.extent.z * 2;
-    //   new_traffic_light.lights.emplace_back(height);
-    //   new_traffic_light.lights.back().vertices.emplace_back(world_vertices[0]);
-    //   new_traffic_light.lights.back().vertices.emplace_back(world_vertices[2]);
-    //   new_traffic_light.lights.back().vertices.emplace_back(world_vertices[6]);
-    //   new_traffic_light.lights.back().vertices.emplace_back(world_vertices[4]);
-    //   for (auto& point : new_traffic_light.lights.back().vertices) {
-    //     point.ApplyScale(this->map_.Scale());
-    //   }
-    // }
-
-    //auto world_vertices = bbx.GetLocalVertices();
-    //auto height = bbx.extent.z * 2;
-    
-    // Just wanting to add some test vertices of the warnings
-    // auto world_vertices = std::array<carla::geom::Location, 8>();
-    // new_disengage_warning.emplace_back(5);
-    // new_disengage_warning.back().vertices.emplace_back(world_vertices[0]);
-    // new_disengage_warning.back().vertices.emplace_back(world_vertices[2]);
-    // new_disengage_warning.back().vertices.emplace_back(world_vertices[6]);
-    // new_disengage_warning.back().vertices.emplace_back(world_vertices[4]);
-    // for (auto& point : new_disengage_warning.back().vertices) {
-    //   point.ApplyScale(this->map_.Scale());
-    // }
   }
 
   template <typename EnvironmentObjectType>
@@ -709,12 +683,29 @@ class CarlaSimulator
       ConstrainPoleTwoDimensions(bbx_copy.extent.x, bbx_copy.extent.y,
                                  bbx_copy.extent.z, constraint);
     }
+    else if constexpr (std::is_same_v<EnvironmentObjectType, map::DisengageWarning>) {
+      std::string test = "have constrained " + std::to_string(bbx_copy.GetLocalVertices().size());
+      logging::LogError(test);
+      auto raw_vertices = bbx_copy.GetLocalVertices();
+      env_obj_in_map.vertices.emplace_back(raw_vertices[0]);
+      //env_obj_in_map.vertices.emplace_back(raw_vertices[1]);
+      env_obj_in_map.vertices.emplace_back(raw_vertices[2]);
+      env_obj_in_map.vertices.emplace_back(raw_vertices[6]);
+      env_obj_in_map.vertices.emplace_back(raw_vertices[4]);
+      //env_obj_in_map.vertices.emplace_back(raw_vertices[5]);
+      // env_obj_in_map.vertices.emplace_back(raw_vertices[3]);
+      // env_obj_in_map.vertices.emplace_back(raw_vertices[7]);
+      env_obj_in_map.height = bbx_copy.extent.z;
+      return;
+      //ConstrainDisengageWarning(bbx_copy.extent.x, bbx_copy.extent.y,bbx_copy.extent.z, 10, width);
+    }
     auto raw_vertices = bbx_copy.GetLocalVertices();
     env_obj_in_map.vertices.emplace_back(raw_vertices[0]);
     env_obj_in_map.vertices.emplace_back(raw_vertices[2]);
     env_obj_in_map.vertices.emplace_back(raw_vertices[6]);
     env_obj_in_map.vertices.emplace_back(raw_vertices[4]);
     env_obj_in_map.height = bbx_copy.extent.z * 2;
+    // env_obj_in_map.y = bbx_copy.extent.y * 10;
     logging::LogDebug("Added one static {} object id {}, name {}",
                       env_obj_in_map.type_str, env_obj_in_map.id, env_obj.name);
   }
@@ -769,6 +760,23 @@ class CarlaSimulator
       z = std::min(z, constraint);
       y = std::min(y, constraint);
     }
+  }
+
+  void ConstrainDisengageWarning(float& x, float& y, float& z, float length, float width) {
+    z = 0.1; // Height of the warning
+    y = 0.2; // moves the warning out of the lane
+    x = 0.3; // How much of the road the disengagement warning should cover
+    
+    // if (z >= x && z >= y) {
+    //   x = std::min(x, constraint);
+    //   y = std::min(y, constraint);
+    // } else if (y >= x && y >= z) {
+    //   x = std::min(x, constraint);
+    //   z = std::min(z, constraint);
+    // } else {
+    //   z = std::min(z, constraint);
+    //   y = std::min(y, constraint);
+    // }
   }
 };
 

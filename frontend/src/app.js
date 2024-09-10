@@ -256,11 +256,19 @@ class CarlaViz extends PureComponent {
                   min={-10}
                   max={10}
                 /> */}
+
+                <LogViewer
+                  log={log}
+                  label="test"
+                  streamName="/automation/disengage_warnings/alert"
+                />
                 <DisengageWidget
                   log={log}
-                  streamName="/automation/disengage_warning"
+                  streamName="/automation/disengage_warnings/alert"
                   style="yellow"
                   label="Warning: Disengagement previously reported here"
+                  //showWarning={true} // TODO: make this use the alert value!
+                  showWarning={x => (x)}
                 />
                 <hr />
                 <MeterWidget

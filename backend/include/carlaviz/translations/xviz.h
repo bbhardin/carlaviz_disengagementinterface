@@ -62,6 +62,9 @@ class XVIZMetadataUpdater {
         .template Category<xviz::StreamMetadata::TIME_SERIES>()
           .Unit("m/s")
           .Type(xviz::StreamMetadata::FLOAT)
+      .Stream("/automation/disengage_warnings/alert")
+        .template Category<xviz::StreamMetadata::VARIABLE>()
+          .Type(xviz::StreamMetadata::BOOL)
       .Stream("/game/info")
         .template Category<xviz::StreamMetadata::UI_PRIMITIVE>()
       .Stream("/vehicle/info")
@@ -420,7 +423,7 @@ class XVIZTranslation
     }
   }
 
-  void UpdateDisengageWarningImpl(uint64_t id, map::DisengageWarningStatus status) {
+  void UpdateDisengageWarningImpl(uint64_t id, bool should_alert) {
     // TODO: IMPLEMENT
     auto disengage_warning_itr = disengage_warnings_.find(id);
     // TODO: Error checking here
@@ -428,15 +431,24 @@ class XVIZTranslation
     //       "hello creating disengage warning",
     //       id);
 
-   std::vector<std::array<float, 3>> test = {{0,0,0},{10,0,0},{10,10,0},{0,10,0}};
+   //std::vector<std::array<float, 3>> test = {{0,0,0},{10,0,0},{10,10,0},{0,10,0}};
    //,{0,1,1},{1,1,1},{1,0,1},{0,0,1}
 
-    builder_.Primitive("/automation/disengage_warnings")
-      .Polygon(test)
-      // .Polygon(map::PointsVectorToArrayVector(input)) // TODO: Not the correct way to get vertices
-      .Style({{"height", 10.0f}})
-      .Classes({DisengageWarningStatusToString(status)});
-      this->UpdatePose(0, {50, 0, 0}, {0, 0, 0}, 0, 0);
+    // Draws a big yellow box
+    // builder_.Primitive("/automation/disengage_warnings")
+    //   .Polygon(test)
+    //   // .Polygon(map::PointsVectorToArrayVector(input)) // TODO: Not the correct way to get vertices
+    //   .Style({{"height", 10.0f}})
+    //   .Classes({DisengageWarningStatusToString(status)});
+    //   this->UpdatePose(0, {50, 0, 0}, {0, 0, 0}, 0, 0);
+
+    // We have to stream the boolean as a time series because variable
+    //  streams have not been implemented in the c++ version of xviz
+    builder_.TimeSeries("/automation/disengage_warnings/alert");
+      Timestamp(now)
+        .Value(should_alert)
+        .ID("alert")
+
   }
 
 

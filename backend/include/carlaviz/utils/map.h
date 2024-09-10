@@ -207,6 +207,8 @@ struct DisengageWarning {
   std::vector<Point> vertices;
   double height = 0;
   constexpr static std::string_view type_str = "disengage_warning";
+  std::array<float, 3> global_coords = {0, 0, 0};
+  std::array<float, 3> local_coords = {0, 0, 0};
 };
 
 enum class TrafficLightStatus { RED = 0, YELLOW, GREEN, UNKNOWN };

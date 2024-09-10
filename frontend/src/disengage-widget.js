@@ -57,26 +57,30 @@ export default class DisengageWidget extends PureComponent {
     streamName: PropTypes.string.isRequired,
     style: PropTypes.string, // Change this back to PropTypes.object
     label: PropTypes.string,
-    transformValue: PropTypes.func
+    transformValue: PropTypes.func,
+    showWarning: PropTypes.func
   };
 
   static defaultProps = {
     style: {},
-    transformValue: x => x
+    transformValue: x => x,
+    showWarning: _ => null
   };
 
   _render = ({theme, streams}) => {
-    const {transformValue, style, label} = this.props;
+    const {transformValue, style, label, showWarning} = this.props;
     const value = style.data;
 
     const styleProps = {theme, userStyle: style.light};
 
     return (
-      <Container theme={theme} layout={style.layout}>
+      <Container theme={theme} layout={style.layout} showWarning={showWarning}>
         
-        <LabelComponent userStyle={style.label}>
-            {label}
-        </LabelComponent>
+        {(showWarning) && (
+          <LabelComponent userStyle={style.label}>
+              {label}
+          </LabelComponent>
+        )}
         <LightComponent key="red" color="red" isOn={value === 'red'} {...styleProps} />
         <LightComponent key="yellow" color="yellow" isOn={value === 'yellow'} {...styleProps} />
         <LightComponent key="green" color="green" isOn={value === 'green'} {...styleProps} />
