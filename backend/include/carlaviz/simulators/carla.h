@@ -172,13 +172,13 @@ class CarlaSimulator
             y_dif = pow(y_dif, 2);
             float z_dif = ego_pos[2] - disengage_pos[2];
             z_dif = pow(z_dif, 2);
-            if (sqrt(x_dif + y_dif + z_dif) < 5000) {
+            if (sqrt(x_dif + y_dif + z_dif) < 50) {
               // We are near a disengagement warning! Let's log that!
               logging::LogError("NEAR WARNING!");
 
-              this->translation_.UpdateDisengageWarning(i, true);
+              this->translation_.UpdateDisengageWarning(i, true, now);
             } else {
-              this->translation_.UpdateDisengageWarning(i, false);
+              this->translation_.UpdateDisengageWarning(i, false, now);
             }
           }
 

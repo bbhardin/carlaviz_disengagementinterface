@@ -120,9 +120,9 @@ class TranslationBase {
         id, status);
   }
 
-  void UpdateDisengageWarning(uint64_t id, bool should_alert) {
+  void UpdateDisengageWarning(uint64_t id, bool should_alert, double now) {
     return static_cast<DerivedTranslation*>(this)->UpdateDisengageWarningImpl(
-        id, should_alert);
+        id, should_alert, now);
   }
 
   void RemoveSensor(sensor::SensorIDType sensor_id) {

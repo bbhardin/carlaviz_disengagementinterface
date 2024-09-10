@@ -63,7 +63,8 @@ class XVIZMetadataUpdater {
           .Unit("m/s")
           .Type(xviz::StreamMetadata::FLOAT)
       .Stream("/automation/disengage_warnings/alert")
-        .template Category<xviz::StreamMetadata::VARIABLE>()
+        .template Category<xviz::StreamMetadata::TIME_SERIES>()
+          .Unit("should alert")
           .Type(xviz::StreamMetadata::BOOL)
       .Stream("/game/info")
         .template Category<xviz::StreamMetadata::UI_PRIMITIVE>()
@@ -423,7 +424,7 @@ class XVIZTranslation
     }
   }
 
-  void UpdateDisengageWarningImpl(uint64_t id, bool should_alert) {
+  void UpdateDisengageWarningImpl(uint64_t id, bool should_alert, double now) {
     // TODO: IMPLEMENT
     auto disengage_warning_itr = disengage_warnings_.find(id);
     // TODO: Error checking here
@@ -444,10 +445,10 @@ class XVIZTranslation
 
     // We have to stream the boolean as a time series because variable
     //  streams have not been implemented in the c++ version of xviz
-    builder_.TimeSeries("/automation/disengage_warnings/alert");
-      Timestamp(now)
+    builder_.TimeSeries("/automation/disengage_warnings/alert")
+      .Timestamp(now)
         .Value(should_alert)
-        .ID("alert")
+        .ID("alert");
 
   }
 

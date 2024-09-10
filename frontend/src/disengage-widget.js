@@ -12,7 +12,15 @@ import BaseWidget from '@streetscape.gl/core/dist/esm/components/hud/base-widget
 const Container = styled.div(props => ({
   display: 'flex',
   justifyContent: 'center',
-  flexDirection: props.layout === 'vertical' ? 'column' : 'row'
+  flexDirection: props.layout === 'vertical' ? 'column' : 'row',
+  // 238, 210, 0, 255   eed202
+  background: "#eed202",
+  width: "500px", // TODO: Need to update this
+  height: "100px",
+  position: "absolute", // Puts it on top of the map
+  color: "black", 
+  fontSize: "20px",
+  paddingTop: "1rem"
 }));
 
 const COLORS = {
@@ -68,22 +76,22 @@ export default class DisengageWidget extends PureComponent {
   };
 
   _render = ({theme, streams}) => {
-    const {transformValue, style, label, showWarning} = this.props;
+    const {log, transformValue, style, label, showWarning} = this.props;
     const value = style.data;
+    const value2 = streams.light && streams.light.data && streams.light.data.variable;
 
     const styleProps = {theme, userStyle: style.light};
 
     return (
       <Container theme={theme} layout={style.layout} showWarning={showWarning}>
-        
-        {(showWarning) && (
+        {(value2) && (
           <LabelComponent userStyle={style.label}>
-              {label}
+              {"Disengagement reported here!"}
           </LabelComponent>
         )}
-        <LightComponent key="red" color="red" isOn={value === 'red'} {...styleProps} />
+        {/* <LightComponent key="red" color="red" isOn={value === 'red'} {...styleProps} />
         <LightComponent key="yellow" color="yellow" isOn={value === 'yellow'} {...styleProps} />
-        <LightComponent key="green" color="green" isOn={value === 'green'} {...styleProps} />
+        <LightComponent key="green" color="green" isOn={value === 'green'} {...styleProps} /> */}
       </Container>
     );
   };

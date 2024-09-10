@@ -179,7 +179,8 @@ class CarlaViz extends PureComponent {
       return [0, 255, 255, 255];
     }
     else if (feature.properties.type === "disengage_warning") {
-      return [255, 255, 0, 255];
+      // Set disengage warning to nice warning safety yellow
+      return [238, 210, 0, 255];
     }
     return [255, 255, 255, 255];
   };
@@ -247,6 +248,17 @@ class CarlaViz extends PureComponent {
               customLayers={customLayers}
             />
             {metadataReceived ? (
+              <div>
+              <div>
+                <DisengageWidget
+                log={log}
+                streamName="/automation/disengage_warnings/alert"
+                style="yellow"
+                label="Warning: Disengagement previously reported here"
+                //showWarning={true} // TODO: make this use the alert value!
+                showWarning={x => (x)}
+              />
+              </div>
               <div id="hud">
                 {/* Hide the acceleration widget */}
                 {/* <MeterWidget
@@ -256,20 +268,6 @@ class CarlaViz extends PureComponent {
                   min={-10}
                   max={10}
                 /> */}
-
-                <LogViewer
-                  log={log}
-                  label="test"
-                  streamName="/automation/disengage_warnings/alert"
-                />
-                <DisengageWidget
-                  log={log}
-                  streamName="/automation/disengage_warnings/alert"
-                  style="yellow"
-                  label="Warning: Disengagement previously reported here"
-                  //showWarning={true} // TODO: make this use the alert value!
-                  showWarning={x => (x)}
-                />
                 <hr />
                 <MeterWidget
                   log={log}
@@ -279,6 +277,7 @@ class CarlaViz extends PureComponent {
                   min={0}
                   max={20}
                 />
+              </div>
               </div>
             ) : (
               <div></div>
