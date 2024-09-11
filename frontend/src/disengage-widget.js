@@ -9,19 +9,32 @@ import styled from '@emotion/styled';
 
 import BaseWidget from '@streetscape.gl/core/dist/esm/components/hud/base-widget';
 
+import steeringwheel_icon from './icons/steeringwheel.png';
+import warning_icon from './icons/warning.png';
+
 const Container = styled.div(props => ({
   display: 'flex',
-  justifyContent: 'center',
+  justifyContent: 'left',
   flexDirection: props.layout === 'vertical' ? 'column' : 'row',
   // 238, 210, 0, 255   eed202
-  background: "#eed202",
+  //background: "#eed202",
+  background:"white",
   width: "500px", // TODO: Need to update this
-  height: "100px",
+  // height: "100px",
   position: "absolute", // Puts it on top of the map
   color: "black", 
-  fontSize: "20px",
-  paddingTop: "1rem"
+  fontSize: "25px",
+  fontWeight: "600"
+  // verticalAlign: "bottom"
 }));
+
+
+const DisengageIcon = styled.img(props => ({
+    padding: "1rem",
+    width:"4rem",
+    float: "left",
+}));
+
 
 const COLORS = {
   red: '#d42e22',
@@ -55,7 +68,7 @@ const LightComponent = styled.div(props => ({
 const LabelComponent = styled.div(props => ({
     fontSize: props.theme.fontSize,
     color: props.theme.textColorSecondary,
-    lineHeight: '1em',
+    //lineHeight: '1em',
     ...evaluateStyle(props.userStyle, props)
   }));
 
@@ -83,11 +96,14 @@ export default class DisengageWidget extends PureComponent {
     const styleProps = {theme, userStyle: style.light};
 
     return (
-      <Container theme={theme} layout={style.layout} showWarning={showWarning}>
+      <Container theme={theme} style={{}} showWarning={showWarning}>
         {(value2) && (
-          <LabelComponent userStyle={style.label}>
-              {"Disengagement reported here!"}
-          </LabelComponent>
+          <div>
+            <DisengageIcon src={warning_icon}></DisengageIcon>
+            <LabelComponent userStyle={style.label} style={{width:"200%", paddingTop:"1.5rem"}}>
+                {"Disengagement reported here!"}
+            </LabelComponent>
+          </div>
         )}
         {/* <LightComponent key="red" color="red" isOn={value === 'red'} {...styleProps} />
         <LightComponent key="yellow" color="yellow" isOn={value === 'yellow'} {...styleProps} />

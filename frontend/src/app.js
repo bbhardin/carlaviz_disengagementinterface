@@ -196,7 +196,7 @@ class CarlaViz extends PureComponent {
 
     return (
       <div id="container">
-        <div id="control-panel">
+        {/* <div id="control-panel">
           {/* <div id="github">
             <p>
               <a href="https://github.com/mjxu96/carlaviz"  style={{"font-family":"Arial"}} target="_blank">
@@ -207,6 +207,7 @@ class CarlaViz extends PureComponent {
               <img src={githubIcon}></img>
             </a>
           </div> */}
+          {/*}
           {metadataReceived ? (
             <div>
               <hr id="github-hr" />
@@ -235,7 +236,7 @@ class CarlaViz extends PureComponent {
               <h4>Launch the backend and refresh</h4>
             </div>
           )}
-        </div>
+        </div> */}
         <div id="log-panel">
           <div id="map-view">
             <LogViewer
