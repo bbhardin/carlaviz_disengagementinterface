@@ -12,56 +12,34 @@ import BaseWidget from '@streetscape.gl/core/dist/esm/components/hud/base-widget
 import steeringwheel_icon from './icons/steeringwheel.png';
 import warning_icon from './icons/warning.png';
 
+
+
 const Container = styled.div(props => ({
   display: 'flex',
   justifyContent: 'left',
   flexDirection: props.layout === 'vertical' ? 'column' : 'row',
   // 238, 210, 0, 255   eed202
   //background: "#eed202",
-  background:"white",
+  background:"#ededed",
   width: "500px", // TODO: Need to update this
-  // height: "100px",
   position: "absolute", // Puts it on top of the map
   color: "black", 
+  borderRadius: "1rem",
   fontSize: "25px",
-  fontWeight: "600"
+  fontWeight: "600", 
   // verticalAlign: "bottom"
 }));
 
-
 const DisengageIcon = styled.img(props => ({
-    padding: "1rem",
-    width:"4rem",
-    float: "left",
+    width: "2.6rem",
+    transform: "translate(-2.3rem, 5px)",
+    float: "left"
 }));
 
-
-const COLORS = {
-  red: '#d42e22',
-  yellow: '#f8ce46',
-  green: '#57ad57'
-};
-
-const LightComponent = styled.div(props => ({
-  boxSizing: 'border-box',
-//   width: props.theme.controlSize,
-//   height: props.theme.controlSize,
-  margin: props.theme.spacingTiny,
-  borderRadius: '50%',
-  borderStyle: 'solid',
-  borderWidth: 2,
-  borderColor: COLORS[props.color],
-  background: props.isOn ? COLORS[props.color] : 'none',
-  width: 0,
-  height: 0,
-  borderLeftStyle: 'transparent',
-  borderRightStyle: 'transparent',
-  borderBottomStyle: 'solid',
-  borderBottomColor: '#555',
-  borderLeft: '25px',
-  borderRight: '25px',
-  borderBottom: '50px',
-  ...evaluateStyle(props.userStyle, props),
+const SteeringIcon = styled.img(props => ({
+  padding: "1rem",
+  width:"3.8rem",
+  float: "left",
 }));
 
 
@@ -88,6 +66,27 @@ export default class DisengageWidget extends PureComponent {
     showWarning: _ => null
   };
 
+  animate() {
+    let pulse = `
+    @-webkit-keyframes ${pulse} {
+      0%, 100% {
+        background-color: #f56a3f;
+      }
+      50% {
+        background-color: #9e42b0;
+      }
+    }
+    `;
+
+    this.addStylesheetRules(pulse);
+    this.setState({
+      animation: "${pulse} 1s infinite"
+    });
+
+    print('dat boi clicked!');
+  }
+
+
   _render = ({theme, streams}) => {
     const {log, transformValue, style, label, showWarning} = this.props;
     const value = style.data;
@@ -99,9 +98,10 @@ export default class DisengageWidget extends PureComponent {
       <Container theme={theme} style={{}} showWarning={showWarning}>
         {(value2) && (
           <div>
-            <DisengageIcon src={warning_icon}></DisengageIcon>
-            <LabelComponent userStyle={style.label} style={{width:"200%", paddingTop:"1.5rem"}}>
-                {"Disengagement reported here!"}
+            <SteeringIcon src={steeringwheel_icon}></SteeringIcon>
+            <DisengageIcon src={warning_icon}  onHover={this.animate.bind(this)}></DisengageIcon>
+            <LabelComponent userStyle={style.label} style={{width:"200%", paddingTop:"1.6rem", transform: "translate(-1.5rem, 0)"}}>
+                {"Disengagement reported ahead"}
             </LabelComponent>
           </div>
         )}

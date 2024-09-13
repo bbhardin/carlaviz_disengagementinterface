@@ -157,14 +157,14 @@ class CarlaSimulator
         // handle vehicles
         //logging::LogError("Checking how close 111");
         if (IsEgoVehicle(*actor)) {
-          logging::LogError("Checking how close");
+          // logging::LogError("Checking how close");
           this->translation_.UpdatePose(
               now, GetPosition(*actor), GetOrientation(*actor),
               actor->GetVelocity().Length(), actor->GetAcceleration().Length());
             
           // Check if ego vehicle is nearing disengage spot and we should display warning
           auto ego_pos = GetPosition(*actor);
-          for (int i = 0; i < 5; i++) {
+          for (int i = 0; i < disengage_warnings_.size(); i++) {  /// TODO FIX THIS!
             std::array<float, 3> disengage_pos = disengage_warnings_[i].global_coords;
             float x_dif = ego_pos[0] - disengage_pos[0];
             x_dif = pow(x_dif, 2);
@@ -174,10 +174,11 @@ class CarlaSimulator
             z_dif = pow(z_dif, 2);
             if (sqrt(x_dif + y_dif + z_dif) < 50) {
               // We are near a disengagement warning! Let's log that!
-              logging::LogError("NEAR WARNING!");
+              // logging::LogError("NEAR WARNING!");
 
               this->translation_.UpdateDisengageWarning(i, true, now);
             } else {
+              // Improvement: could update only if was previously true, not all of the time
               this->translation_.UpdateDisengageWarning(i, false, now);
             }
           }
@@ -666,11 +667,11 @@ class CarlaSimulator
   }
 
   // void AddDisengageWarning(const carla::rpc::EnvironmentObject& warning) {
-  void AddDisengageWarning(int id) {
+  // void AddDisengageWarning(int id) {
 
-    map::DisengageWarning& new_disengage_warning =
-        this->map_.AddDisengageWarning(id);
-  }
+  //   map::DisengageWarning& new_disengage_warning =
+  //       this->map_.AddDisengageWarning(id);
+  // }
 
   template <typename EnvironmentObjectType>
   void AddEnvironmentObject(
@@ -687,6 +688,11 @@ class CarlaSimulator
       std::string test = "have constrained " + std::to_string(bbx_copy.GetLocalVertices().size());
       logging::LogError(test);
       auto raw_vertices = bbx_copy.GetLocalVertices();
+      for (int j = 0; j < raw_vertices.size(); j++) {
+        // In UnReal, we put the disengagement under the road surface but now we want to
+        //   put it on top of the lane lines.
+        raw_vertices[j].z = 0;
+      }
       env_obj_in_map.vertices.emplace_back(raw_vertices[0]);
       //env_obj_in_map.vertices.emplace_back(raw_vertices[1]);
       env_obj_in_map.vertices.emplace_back(raw_vertices[2]);
