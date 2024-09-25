@@ -120,7 +120,7 @@ class CarlaSimulator
       lidar_points_;
 
   // Hold all the disengagement warnings
-  std::unordered_map<int, map::DisengageWarning> disengage_warnings_;
+  // std::unordered_map<int, map::DisengageWarning> disengage_warnings_;
 
   void CheckAndLoadMap(const carla::client::World& world) {
     auto carla_map = world.GetMap();
@@ -164,8 +164,10 @@ class CarlaSimulator
             
           // Check if ego vehicle is nearing disengage spot and we should display warning
           auto ego_pos = GetPosition(*actor);
-          for (int i = 0; i < disengage_warnings_.size(); i++) {  /// TODO FIX THIS!
-            std::array<float, 3> disengage_pos = disengage_warnings_[i].global_coords;
+          logging::LogError(std::to_string(this->map_.DisengageWarnings().size()));
+          for (auto& [id, warning]: this->map_.DisengageWarnings()) {  /// TODO FIX THIS!
+            // logging::LogError("Loooping through disenage warnings "  );
+            std::array<float, 3> disengage_pos = warning.global_coords;
             float x_dif = ego_pos[0] - disengage_pos[0];
             x_dif = pow(x_dif, 2);
             float y_dif = ego_pos[1] - disengage_pos[1];
@@ -176,12 +178,14 @@ class CarlaSimulator
               // We are near a disengagement warning! Let's log that!
               // logging::LogError("NEAR WARNING!");
 
-              this->translation_.UpdateDisengageWarning(i, true, now);
+              this->translation_.UpdateDisengageWarning(warning.id, true, now);
             } else {
               // Improvement: could update only if was previously true, not all of the time
-              this->translation_.UpdateDisengageWarning(i, false, now);
+              this->translation_.UpdateDisengageWarning(warning.id, false, now);
             }
           }
+
+          
 
               
         } else {
@@ -535,9 +539,8 @@ class CarlaSimulator
     
     auto actor_snapshots =
         world.WaitForTick(std::chrono::seconds(this->option_.timeout_seconds));
-    logging::LogError(
-        "43about to add the env objects");
     for (const auto& actor_snapshot : actor_snapshots) {
+      // TODO: Get this working
       // auto actor = world.GetActor(actor_snapshot.id);
       // if (!actor) {
       //   continue;
@@ -548,9 +551,6 @@ class CarlaSimulator
       //   AddTrafficLight(actor);
       // }
     }
-
-    logging::LogError(
-        "23about to add the env objects");
 
     for (const auto& env_obj : world.GetEnvironmentObjects(
              static_cast<uint8_t>(carla::rpc::CityObjectLabel::Any))) {  
@@ -573,7 +573,7 @@ class CarlaSimulator
         default:
           if (env_obj.name.find("Disengage_Warning") != std::string::npos) {
             logging::LogError("We found a warning! ");
-            //AddDisengageWarning(env_obj.id);
+            AddDisengageWarning(env_obj.id);
             AddEnvironmentObject<map::DisengageWarning>(env_obj, 0.3);
           }
           // not processing other types
@@ -667,11 +667,9 @@ class CarlaSimulator
   }
 
   // void AddDisengageWarning(const carla::rpc::EnvironmentObject& warning) {
-  // void AddDisengageWarning(int id) {
-
-  //   map::DisengageWarning& new_disengage_warning =
-  //       this->map_.AddDisengageWarning(id);
-  // }
+  void AddDisengageWarning(int id) {
+    this->map_.AddDisengageWarning(id);
+  }
 
   template <typename EnvironmentObjectType>
   void AddEnvironmentObject(
@@ -694,13 +692,9 @@ class CarlaSimulator
         raw_vertices[j].z = 0;
       }
       env_obj_in_map.vertices.emplace_back(raw_vertices[0]);
-      //env_obj_in_map.vertices.emplace_back(raw_vertices[1]);
       env_obj_in_map.vertices.emplace_back(raw_vertices[2]);
       env_obj_in_map.vertices.emplace_back(raw_vertices[6]);
       env_obj_in_map.vertices.emplace_back(raw_vertices[4]);
-      //env_obj_in_map.vertices.emplace_back(raw_vertices[5]);
-      // env_obj_in_map.vertices.emplace_back(raw_vertices[3]);
-      // env_obj_in_map.vertices.emplace_back(raw_vertices[7]);
       env_obj_in_map.height = bbx_copy.extent.z;
       return;
       //ConstrainDisengageWarning(bbx_copy.extent.x, bbx_copy.extent.y,bbx_copy.extent.z, 10, width);

@@ -42,6 +42,7 @@ import { APP_SETTINGS, XVIZ_STYLE, CAR, UI_THEME } from "./constants";
 import githubIcon from "../public/github_icon.png";
 
 import "./index.css";
+import AutomationWidget from "./automation-widget";
 
 const backendHostname =
   __BACKEND_HOST__ === "" ? document.location.hostname : __BACKEND_HOST__;
@@ -214,12 +215,12 @@ class CarlaViz extends PureComponent {
               <hr />
               <XVIZPanel log={log} name="Camera" />
               <hr />
-              {/* <XVIZPanel
+              <XVIZPanel
                 log={log}
                 name="Tables"
                 componentProps={tableComponentProps}
               />
-              <hr /> */}
+              <hr />
               <Form
                 data={APP_SETTINGS}
                 values={this.state.settings}
@@ -250,6 +251,14 @@ class CarlaViz extends PureComponent {
             {metadataReceived ? (
               <div>
               <div>
+                <AutomationWidget
+                log={log}
+                streamName="/automation/disengage_warnings/alert"
+                style="yellow"
+                label="Automation engaged"
+                //showWarning={true} // TODO: make this use the alert value!
+                showWarning={x => (x)}
+                />
                 <DisengageWidget
                 log={log}
                 streamName="/automation/disengage_warnings/alert"
@@ -257,7 +266,7 @@ class CarlaViz extends PureComponent {
                 label="Warning: Disengagement previously reported here"
                 //showWarning={true} // TODO: make this use the alert value!
                 showWarning={x => (x)}
-              />
+                />
               </div>
               <div id="hud">
                 {/* Hide the acceleration widget */}

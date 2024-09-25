@@ -64,7 +64,11 @@ class XVIZMetadataUpdater {
           .Type(xviz::StreamMetadata::FLOAT)
       .Stream("/automation/disengage_warnings/alert")
         .template Category<xviz::StreamMetadata::TIME_SERIES>()
-          .Unit("should alert")
+          .Unit("should alert")     // Todo: can this line be removed?
+          .Type(xviz::StreamMetadata::BOOL)
+      .Stream("automation/status")
+        .template Category<xviz::StreamMetadata::TIME_SERIES>()
+          .Unit("engaged")        // Todo: can this line be removed?
           .Type(xviz::StreamMetadata::BOOL)
       .Stream("/game/info")
         .template Category<xviz::StreamMetadata::UI_PRIMITIVE>()
@@ -426,7 +430,10 @@ class XVIZTranslation
 
   void UpdateDisengageWarningImpl(uint64_t id, bool should_alert, double now) {
     // TODO: IMPLEMENT
-    auto disengage_warning_itr = disengage_warnings_.find(id);
+    //auto disengage_warning_itr = >map_.DisengageWarnings().find(id);
+
+
+    
     // TODO: Error checking here
     // logging::LogError(
     //       "hello creating disengage warning",
@@ -482,8 +489,10 @@ class XVIZTranslation
     }
 
     // record positions of disengagement warnings
+    // TODO: Might be able to remove this part since we add the warnings elsewhere
     for (const auto& disengage_warning : map.DisengageWarnings()) {
-      disengage_warnings_.insert({disengage_warning.id, disengage_warning});
+      //map.DisengageWarnings().insert({disengage_warning.id, disengage_warning});
+      logging::LogError("Inserted a disengagement warning during the map update phase");
     }
   }
 
@@ -499,7 +508,7 @@ class XVIZTranslation
   bool is_time_set_ = false;
 
   std::unordered_map<uint64_t, map::TrafficLight> traffic_lights_;
-  std::unordered_map<uint64_t, map::DisengageWarning> disengage_warnings_;
+  // std::unordered_map<uint64_t, map::DisengageWarning> disengage_warnings_;
 };
 
 }  // namespace carlaviz::translations

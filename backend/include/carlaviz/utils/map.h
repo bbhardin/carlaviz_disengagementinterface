@@ -265,10 +265,11 @@ class Map {
     return traffic_lights_.back();
   }
 
-  DisengageWarning& AddDisengageWarning(uint64_t warning_id) {
-    disengage_warnings_.emplace_back(DisengageWarning{.id = warning_id});
-    return disengage_warnings_.back();
-  }
+  void AddDisengageWarning(uint64_t warning_id) {
+    std::pair<int,DisengageWarning> new_warning (warning_id, DisengageWarning{.id = warning_id});
+    disengage_warnings_.insert(new_warning);
+    //return disengage_warnings_.end();
+  } 
 
   template <typename T>
   T& AddStaticObject(uint64_t id) {
@@ -286,7 +287,7 @@ class Map {
     return traffic_lights_;
   }
 
-  const std::vector<DisengageWarning>& DisengageWarnings() const {
+  const std::unordered_map<int, DisengageWarning>& DisengageWarnings() const {
     return disengage_warnings_;
   }
 
@@ -469,7 +470,7 @@ class Map {
   std::vector<Road> roads_;
   std::vector<StopSign> stop_signs_;
   std::vector<TrafficLight> traffic_lights_;
-  std::vector<DisengageWarning> disengage_warnings_;
+  std::unordered_map<int, DisengageWarning> disengage_warnings_;
 
   detail::StaticObjectSelector<Building, Sidewalk, Pole, Plant, DisengageWarning> static_objects_;
 };

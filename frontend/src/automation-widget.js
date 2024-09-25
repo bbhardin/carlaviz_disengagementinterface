@@ -15,42 +15,46 @@ import warning_icon from './icons/warning.png';
 
 
 const Container = styled.div(props => ({
-  display: 'flex',
-  justifyContent: 'left',
-  flexDirection: props.layout === 'vertical' ? 'column' : 'row',
+  //display: 'flex',
+  //justifyContent: 'left',
+  //flexDirection: props.layout === 'vertical' ? 'column' : 'row',
   // 238, 210, 0, 255   eed202
   //background: "#eed202",
-  background:"#ededed",
+  background:"black",
   width: "500px", // TODO: Need to update this
   position: "absolute", // Puts it on top of the map
   color: "black", 
-  borderRadius: "1rem",
-  fontSize: "25px",
+  borderRadius: "100px",
+  fontSize: "20px",
   fontWeight: "600", 
+  color: "white",
+  textAlign: "center",
   // verticalAlign: "bottom"
 }));
 
-const DisengageIcon = styled.img(props => ({
-    width: "2.6rem",
-    transform: "translate(-2.3rem, 5px)",
-    float: "left"
-}));
-
-const SteeringIcon = styled.img(props => ({
-  padding: "1rem",
-  width:"3.8rem",
-  float: "left",
+const BlueDot = styled.span(props => ({
+  height: "15px",
+  width: "70px",
+  borderRadius: "7px",
+  margin: "1.6rem",
+  position: "relative",
+  backgroundColor: props.engaged ? '#7df9ff' : "gray",
+  display:"inline-block"
 }));
 
 
 const LabelComponent = styled.div(props => ({
     fontSize: props.theme.fontSize,
     color: props.theme.textColorSecondary,
+    display: "inline-block",
+    height: "100%",
+    paddingTop: "1.1rem",
+    //position: "absolute",
     //lineHeight: '1em',
     ...evaluateStyle(props.userStyle, props)
   }));
 
-export default class DisengageWidget extends PureComponent {
+export default class AutomationWidget extends PureComponent {
   static propTypes = {
     log: PropTypes.object.isRequired,
     streamName: PropTypes.string.isRequired,
@@ -88,24 +92,23 @@ export default class DisengageWidget extends PureComponent {
   _render = ({theme, streams}) => {
     const {log, transformValue, style, label, showWarning} = this.props;
     const value = style.data;
+    /* Soon to hold the automation value */
     const value2 = streams.light && streams.light.data && streams.light.data.variable;
 
     const styleProps = {theme, userStyle: style.light};
 
     return (
       <Container theme={theme} style={{}} showWarning={showWarning}>
-        {(value2) && (
+        {/* Blue dots if engaged, gray dots if disengaged */}
+        {(true) && (
           <div>
-            <SteeringIcon src={steeringwheel_icon}></SteeringIcon>
-            <DisengageIcon src={warning_icon}  onHover={this.animate.bind(this)}></DisengageIcon>
-            <LabelComponent userStyle={style.label} style={{width:"200%", paddingTop:"1.6rem", transform: "translate(-1.5rem, 0)"}}>
-                {"Disengagement reported ahead"}
+            <BlueDot engaged={true} style={{float: "left"}}></BlueDot>
+            <LabelComponent userStyle={style.label} style={{}}>
+                {"Automation: Engaged"}
             </LabelComponent>
+            <BlueDot engaged={true} style={{float: "right"}}></BlueDot>
           </div>
         )}
-        {/* <LightComponent key="red" color="red" isOn={value === 'red'} {...styleProps} />
-        <LightComponent key="yellow" color="yellow" isOn={value === 'yellow'} {...styleProps} />
-        <LightComponent key="green" color="green" isOn={value === 'green'} {...styleProps} /> */}
       </Container>
     );
   };
