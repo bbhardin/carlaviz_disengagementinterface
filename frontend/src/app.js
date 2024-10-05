@@ -181,7 +181,8 @@ class CarlaViz extends PureComponent {
     }
     else if (feature.properties.type === "disengage_warning") {
       // Set disengage warning to nice warning safety yellow
-      return [238, 210, 0, 255];
+      // warning yellow warning
+      return [238, 210, 0, 70];
     }
     return [255, 255, 255, 255];
   };
@@ -282,9 +283,9 @@ class CarlaViz extends PureComponent {
                   log={log}
                   streamName="/vehicle/velocity"
                   label="Speed"
-                  getWarning={x => (x > 6 ? "FAST" : "")}
+                  getWarning={x => (x > 25 ? "FAST" : "")}
                   min={0}
-                  max={20}
+                  max={35}
                 />
               </div>
               </div>

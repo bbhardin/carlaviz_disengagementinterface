@@ -155,16 +155,14 @@ class CarlaSimulator
       //logging::LogError("actor type: {}", actor->GetTypeId());
       if (utils::StartWith(actor->GetTypeId(), "vehicle") || (actor->GetTypeId() == "harplab.dreyevr_vehicle.teslam3")) {
         // handle vehicles
-        //logging::LogError("Checking how close 111");
         if (IsEgoVehicle(*actor)) {
-          // logging::LogError("Checking how close");
           this->translation_.UpdatePose(
               now, GetPosition(*actor), GetOrientation(*actor),
               actor->GetVelocity().Length(), actor->GetAcceleration().Length());
             
           // Check if ego vehicle is nearing disengage spot and we should display warning
           auto ego_pos = GetPosition(*actor);
-          logging::LogError(std::to_string(this->map_.DisengageWarnings().size()));
+          //logging::LogError(std::to_string(this->map_.DisengageWarnings().size()));
           for (auto& [id, warning]: this->map_.DisengageWarnings()) {  /// TODO FIX THIS!
             // logging::LogError("Loooping through disenage warnings "  );
             std::array<float, 3> disengage_pos = warning.global_coords;
@@ -269,12 +267,6 @@ class CarlaSimulator
         }
       }
     }
-
-    // Update the disengagement warnings we've added to the scene
-    // for (int i = 0; i < 5; i++) {
-    //   // NOTE THIS does log so it's working
-    //   //logging::LogError("all of the warnings", i);
-    // }
 
     this->ClearRemovedSensors();
   }
@@ -684,7 +676,7 @@ class CarlaSimulator
     }
     else if constexpr (std::is_same_v<EnvironmentObjectType, map::DisengageWarning>) {
       std::string test = "have constrained " + std::to_string(bbx_copy.GetLocalVertices().size());
-      logging::LogError(test);
+      //logging::LogError(test);
       auto raw_vertices = bbx_copy.GetLocalVertices();
       for (int j = 0; j < raw_vertices.size(); j++) {
         // In UnReal, we put the disengagement under the road surface but now we want to

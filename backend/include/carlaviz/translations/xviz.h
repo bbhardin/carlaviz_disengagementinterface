@@ -82,6 +82,7 @@ class XVIZMetadataUpdater {
           .StreamStyle(
             {
               {"extruded", true},
+              //{"fill_color", "ff0000"}
               {"fill_color", "#ff66cc"}
             })
       // pedestrians
@@ -122,7 +123,34 @@ class XVIZMetadataUpdater {
           .StyleClass("yellow", {{"fill_color", "#ffff00"}})
           .StyleClass("green", {{"fill_color", "#00ff00"}})
           .StyleClass("unknown", {{"fill_color", "#c0c0c0"}})
-      // disengagement warning objects
+      // .Stream("/drawing/polylines")
+      //   .template Category<xviz::StreamMetadata::PRIMITIVE>()
+      //     .Type(xviz::StreamMetadata::POLYGON)
+      //     .Coordinate(xviz::StreamMetadata::IDENTITY)
+      //     .StreamStyle(
+      //       {
+      //         {"extruded", true},
+      //         {"fill_color", "#ff0000"}
+      //       })
+      // .Stream("/drawing/texts")
+      //   .template Category<xviz::StreamMetadata::UI_PRIMITIVE>()
+      //     // .Type(xviz::StreamMetadata::TEXT)
+      //     // .Coordinate(xviz::StreamMetadata::IDENTITY)
+      //     // .StreamStyle(
+      //     //   {
+      //     //     {"extruded", true},
+      //     //     {"fill_color", "#ff0000"}
+      //     //   })
+      // .Stream("/drawing/points")
+      //   .template Category<xviz::StreamMetadata::UI_PRIMITIVE>()
+      //     // .Type(xviz::StreamMetadata::POLYGON)
+      //     // .Coordinate(xviz::StreamMetadata::IDENTITY)
+      //     // .StreamStyle(
+      //     //   {
+      //     //     {"extruded", true},
+      //     //     {"fill_color", "#ff0000"}
+      //     //   })
+      // // disengagement warning objects
       .Stream("/automation/disengage_warnings")
         .template Category<xviz::StreamMetadata::PRIMITIVE>()
         .Type(xviz::StreamMetadata::POLYGON)
@@ -175,6 +203,7 @@ class XVIZMetadataUpdater {
       .Container("Tables", xviz::LayoutType::HORIZONTAL)
         .TreeTable("Simulator Info", "Simulator Info", "/game/info", false)
         .TreeTable("Ego Vehicle Info", "Ego Vehicle Info", "/vehicle/info", false)
+        .TreeTable("Ego Vehicle Info2", "Ego Vehicle Info2", "/drawing/texts", false)
         .TreeTable("Disengagements", "Disengagements", "/automation/disengage_warnings", false)
       .EndContainer()
     .UI("Metrics")
@@ -429,29 +458,6 @@ class XVIZTranslation
   }
 
   void UpdateDisengageWarningImpl(uint64_t id, bool should_alert, double now) {
-    // TODO: IMPLEMENT
-    //auto disengage_warning_itr = >map_.DisengageWarnings().find(id);
-
-
-    
-    // TODO: Error checking here
-    // logging::LogError(
-    //       "hello creating disengage warning",
-    //       id);
-
-   //std::vector<std::array<float, 3>> test = {{0,0,0},{10,0,0},{10,10,0},{0,10,0}};
-   //,{0,1,1},{1,1,1},{1,0,1},{0,0,1}
-
-    // Draws a big yellow box
-    // builder_.Primitive("/automation/disengage_warnings")
-    //   .Polygon(test)
-    //   // .Polygon(map::PointsVectorToArrayVector(input)) // TODO: Not the correct way to get vertices
-    //   .Style({{"height", 10.0f}})
-    //   .Classes({DisengageWarningStatusToString(status)});
-    //   this->UpdatePose(0, {50, 0, 0}, {0, 0, 0}, 0, 0);
-
-    // We have to stream the boolean as a time series because variable
-    //  streams have not been implemented in the c++ version of xviz
     builder_.TimeSeries("/automation/disengage_warnings/alert")
       .Timestamp(now)
         .Value(should_alert)

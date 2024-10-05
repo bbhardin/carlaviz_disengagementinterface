@@ -99,7 +99,7 @@ export default class DisengageWidget extends PureComponent {
             <SteeringIcon src={steeringwheel_icon}></SteeringIcon>
             <DisengageIcon src={warning_icon}  onHover={this.animate.bind(this)}></DisengageIcon>
             <LabelComponent userStyle={style.label} style={{width:"200%", paddingTop:"1.6rem", transform: "translate(-1.5rem, 0)"}}>
-                {"Disengagement reported ahead"}
+                {"Possible Disengagement Ahead"}
             </LabelComponent>
           </div>
         )}
