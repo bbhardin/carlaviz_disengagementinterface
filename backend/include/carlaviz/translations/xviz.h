@@ -33,6 +33,7 @@
 
 #include <xviz/xviz.h>
 #include <nlohmann/json.hpp>
+#include <fstream>
 
 #include <unordered_map>
 
@@ -123,34 +124,34 @@ class XVIZMetadataUpdater {
           .StyleClass("yellow", {{"fill_color", "#ffff00"}})
           .StyleClass("green", {{"fill_color", "#00ff00"}})
           .StyleClass("unknown", {{"fill_color", "#c0c0c0"}})
-      // .Stream("/drawing/polylines")
-      //   .template Category<xviz::StreamMetadata::PRIMITIVE>()
-      //     .Type(xviz::StreamMetadata::POLYGON)
-      //     .Coordinate(xviz::StreamMetadata::IDENTITY)
-      //     .StreamStyle(
-      //       {
-      //         {"extruded", true},
-      //         {"fill_color", "#ff0000"}
-      //       })
-      // .Stream("/drawing/texts")
-      //   .template Category<xviz::StreamMetadata::UI_PRIMITIVE>()
-      //     // .Type(xviz::StreamMetadata::TEXT)
-      //     // .Coordinate(xviz::StreamMetadata::IDENTITY)
-      //     // .StreamStyle(
-      //     //   {
-      //     //     {"extruded", true},
-      //     //     {"fill_color", "#ff0000"}
-      //     //   })
-      // .Stream("/drawing/points")
-      //   .template Category<xviz::StreamMetadata::UI_PRIMITIVE>()
-      //     // .Type(xviz::StreamMetadata::POLYGON)
-      //     // .Coordinate(xviz::StreamMetadata::IDENTITY)
-      //     // .StreamStyle(
-      //     //   {
-      //     //     {"extruded", true},
-      //     //     {"fill_color", "#ff0000"}
-      //     //   })
-      // // disengagement warning objects
+      .Stream("/drawing/polylines")
+        .template Category<xviz::StreamMetadata::PRIMITIVE>()
+          .Type(xviz::StreamMetadata::POLYGON)
+          .Coordinate(xviz::StreamMetadata::IDENTITY)
+          .StreamStyle(
+            {
+              {"extruded", true},
+              {"fill_color", "#ff0000"}
+            })
+      .Stream("/drawing/texts")
+        .template Category<xviz::StreamMetadata::UI_PRIMITIVE>()
+          // .Type(xviz::StreamMetadata::TEXT)
+          // .Coordinate(xviz::StreamMetadata::IDENTITY)
+          // .StreamStyle(
+          //   {
+          //     {"extruded", true},
+          //     {"fill_color", "#ff0000"}
+          //   })
+      .Stream("/drawing/points")
+        .template Category<xviz::StreamMetadata::UI_PRIMITIVE>()
+          // .Type(xviz::StreamMetadata::POLYGON)
+          // .Coordinate(xviz::StreamMetadata::IDENTITY)
+          // .StreamStyle(
+          //   {
+          //     {"extruded", true},
+          //     {"fill_color", "#ff0000"}
+          //   })
+      // disengagement warning objects
       .Stream("/automation/disengage_warnings")
         .template Category<xviz::StreamMetadata::PRIMITIVE>()
         .Type(xviz::StreamMetadata::POLYGON)
@@ -463,6 +464,48 @@ class XVIZTranslation
         .Value(should_alert)
         .ID("alert");
 
+    // TODO: Move this out of this function
+    //        This should definitely not be done every update because that's a crazy
+    //        amount of reading and writing files
+    
+    // Open the file and create array of points
+    // Create an input file stream to read the JSON file
+    // TODO: Convert to a relative path
+    std::ifstream file("C:/Applications/ben_code/waypoints03.json");
+
+    // Check if the file opened successfully
+    if (!file.is_open()) {
+        std::cerr << "Error: Could not open the json waypoints 3 file." << std::endl;
+    }
+
+    // Parse the JSON data from the file
+    nlohmann::json jsonData = nlohmann::json::parse(file);
+
+    // Close the file
+    file.close();
+
+    logging::LogError("About to waypoint");
+
+    // Accessing values from the parsed JSON
+    // auto waypoints = jsonData["waypoints"];
+
+    std::vector<std::vector<float>> waypoints = jsonData["waypoints"].get<std::vector<std::vector<float>>>();
+
+    // Display the points using the builder function
+    
+    std::vector<std::array<float, 3>> vertices;
+
+    for (auto point : waypoints) {
+      // logging::LogError("about to examine le point");
+
+      vertices.push_back({point[0], point[1], point[2]});
+      
+    }
+
+    builder_.Primitive("/drawing/polylines")
+        .Polygon(vertices)
+        .Style({{"height", 0.1f}, {"stroke_width", 1.5f}});
+    
   }
 
 
