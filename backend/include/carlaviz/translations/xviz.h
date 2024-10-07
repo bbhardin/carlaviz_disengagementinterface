@@ -484,7 +484,7 @@ class XVIZTranslation
     // Close the file
     file.close();
 
-    logging::LogError("About to waypoint");
+    //logging::LogError("About to waypoint");
 
     // Accessing values from the parsed JSON
     // auto waypoints = jsonData["waypoints"];
@@ -498,13 +498,16 @@ class XVIZTranslation
     for (auto point : waypoints) {
       // logging::LogError("about to examine le point");
 
-      vertices.push_back({point[0], point[1], point[2]});
+      // For some reason we have to flip the y
+      vertices.push_back({point[0], -1.0f*point[1], point[2]});
       
     }
 
     builder_.Primitive("/drawing/polylines")
-        .Polygon(vertices)
-        .Style({{"height", 0.1f}, {"stroke_width", 1.5f}});
+        .Polyline(vertices)
+        .Style({{"height", 0.1f},
+        {"stroke_width", 1.7f},
+        {"stroke_color", "#4a89f360"}});
     
   }
 
