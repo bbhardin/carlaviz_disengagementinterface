@@ -162,7 +162,7 @@ class CarlaSimulator
             
           // Check if ego vehicle is nearing disengage spot and we should display warning
           auto ego_pos = GetPosition(*actor);
-          //logging::LogError(std::to_string(this->map_.DisengageWarnings().size()));
+         
           for (auto& [id, warning]: this->map_.DisengageWarnings()) {  /// TODO FIX THIS!
             // logging::LogError("Loooping through disenage warnings "  );
             std::array<float, 3> disengage_pos = warning.global_coords;
@@ -182,8 +182,33 @@ class CarlaSimulator
               this->translation_.UpdateDisengageWarning(warning.id, false, now);
             }
           }
-
           
+          // Open the file and create array of points
+          // Create an input file stream to read the JSON file
+          // TODO: Convert to a relative path
+          std::ifstream file("C:/Applications/ben_code/waypoints03.json");
+
+          // Check if the file opened successfully
+          if (!file.is_open()) {
+              std::cerr << "Error: Could not open the json waypoints 3 file." << std::endl;
+          }
+
+          // Parse the JSON data from the file
+          nlohmann::json jsonData = nlohmann::json::parse(file);
+          file.close();
+
+          std::vector<std::vector<float>> waypoints = jsonData["waypoints"].get<std::vector<std::vector<float>>>();
+          
+          std::vector<std::array<float, 3>> vertices;
+          for (auto point : waypoints) {
+            // logging::LogError("about to examine le point");
+
+            // For some reason we have to flip the y
+            vertices.push_back({point[0], -1.0f*point[1], point[2]});
+            
+          }
+
+          this->translation_.UpdateRoutePolylineImpl(vertices);
 
               
         } else {

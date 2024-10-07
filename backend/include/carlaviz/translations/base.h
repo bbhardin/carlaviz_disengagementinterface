@@ -125,6 +125,11 @@ class TranslationBase {
         id, should_alert, now);
   }
 
+  void UpdateDisengageWarning(std::vector<std::array<float, 3>> vertices) {
+    return static_cast<DerivedTranslation*>(this)->UpdateRoutePolylineImpl(
+        vertices);
+  }
+
   void RemoveSensor(sensor::SensorIDType sensor_id) {
     return static_cast<DerivedTranslation*>(this)->RemoveSensorImpl(sensor_id);
   }
