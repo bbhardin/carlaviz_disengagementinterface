@@ -119,6 +119,9 @@ class CarlaSimulator
   std::unordered_map<SensorIDType, std::deque<sensor::LidarPointsWithTimestamp>>
       lidar_points_;
 
+  std::vector<std::array<float, 3>> upcoming_waypoints;
+  std::vector<std::array<float, 3>> passed_waypoints;
+
   // Hold all the disengagement warnings
   // std::unordered_map<int, map::DisengageWarning> disengage_warnings_;
 
@@ -183,32 +186,37 @@ class CarlaSimulator
             }
           }
           
-          // Open the file and create array of points
-          // Create an input file stream to read the JSON file
-          // TODO: Convert to a relative path
-          std::ifstream file("C:/Applications/ben_code/waypoints03.json");
 
-          // Check if the file opened successfully
-          if (!file.is_open()) {
-              std::cerr << "Error: Could not open the json waypoints 3 file." << std::endl;
+          if (upcoming_waypoints.empty()) {
+            // Open the file and create array of points
+            // Create an input file stream to read the JSON file
+            // TODO: Convert to a relative path
+            std::ifstream file("C:/Applications/ben_code/waypoints03.json");
+
+            logging::LogError("Reading the waypoints from the file");
+
+            // Check if the file opened successfully
+            if (!file.is_open()) {
+                std::cerr << "Error: Could not open the json waypoints 3 file." << std::endl;
+            }
+
+            // Parse the JSON data from the file
+            nlohmann::json jsonData = nlohmann::json::parse(file);
+            file.close();
+
+            std::vector<std::vector<float>> waypoints = jsonData["waypoints"].get<std::vector<std::vector<float>>>();
+
+            upcoming_waypoints.clear(); // Shouldn't need to do, but being extra careful :) 
+            passed_waypoints.clear();
+            for (auto point : waypoints) {
+              // For some reason we have to flip the y
+              upcoming_waypoints.push_back({point[0], -1.0f*point[1], point[2]});
+            }
           }
 
-          // Parse the JSON data from the file
-          nlohmann::json jsonData = nlohmann::json::parse(file);
-          file.close();
+          // TODO: Look at position and group the waypoints based on if we have already passed them
 
-          std::vector<std::vector<float>> waypoints = jsonData["waypoints"].get<std::vector<std::vector<float>>>();
-          
-          std::vector<std::array<float, 3>> vertices;
-          for (auto point : waypoints) {
-            // logging::LogError("about to examine le point");
-
-            // For some reason we have to flip the y
-            vertices.push_back({point[0], -1.0f*point[1], point[2]});
-            
-          }
-
-          this->translation_.UpdateRoutePolylineImpl(vertices);
+          this->translation_.UpdateRoutePolylineImpl(upcoming_waypoints);
 
               
         } else {
