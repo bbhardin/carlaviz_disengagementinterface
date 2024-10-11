@@ -216,6 +216,63 @@ class CarlaSimulator
 
           // TODO: Look at position and group the waypoints based on if we have already passed them
 
+          // Check how close we are to the next 3 waypoints
+          /// TODO: need to add check if empty
+
+          int i = 0;
+          for (std::array<float, 3> next_waypoint : upcoming_waypoints) {
+            // Remove all waypoints behind where we currently are
+
+            float x_dif = ego_pos[0] - next_waypoint[0];
+            x_dif = pow(x_dif, 2);
+            float y_dif = ego_pos[1] - next_waypoint[1];
+            y_dif = pow(y_dif, 2);
+            float z_dif = ego_pos[2] - next_waypoint[2];
+            z_dif = pow(z_dif, 2);
+            //logging::LogError("How close we are: %s", sqrt(x_dif + y_dif + z_dif));
+
+            // First find the first element that matches where we are in case that we start in the middle of the route
+            double dist = sqrt(x_dif + y_dif + z_dif);
+            if (dist < 15.0) {
+              //logging::LogError("HAVE FOUND A NEARBY WAYPOINT");
+              // Erase the first element in the vector and add it to the passed waypoints
+              //logging::LogError("Waypoints size %i\n " + std::to_string(upcoming_waypoints.size()));
+              upcoming_waypoints.erase(upcoming_waypoints.begin(), upcoming_waypoints.begin()+i+1);
+              //logging::LogError("Waypoints size %i\n " + std::to_string(upcoming_waypoints.size()));
+              logging::LogError("i got up to " + std::to_string(i));
+              break;
+
+            } else {
+              passed_waypoints.push_back(next_waypoint);
+            }
+            i++;
+          }
+          std::array<float, 3> next_waypoint = upcoming_waypoints.front();
+
+          // Just use page refresh to restore old points if vehicle drastically moves
+          // float x_dif = ego_pos[0] - next_waypoint[0];
+          // x_dif = pow(x_dif, 2);
+          // float y_dif = ego_pos[1] - next_waypoint[1];
+          // y_dif = pow(y_dif, 2);
+          // float z_dif = ego_pos[2] - next_waypoint[2];
+          // z_dif = pow(z_dif, 2);
+          // //logging::LogError("How close we are: %s", sqrt(x_dif + y_dif + z_dif));
+
+          // // First find the first element that matches where we are in case that we start in the middle of the route
+          // double dist = sqrt(x_dif + y_dif + z_dif);
+          // if (dist > 100.0) {
+          //   // We probably have reset the ego vehicle and need to reset the points
+          //   logging::LogError("Resetting all points");
+          //   upcoming_waypoints.clear();
+          //   //upcoming_waypoints.swap(passed_waypoints);
+          //   //passed_waypoints.insert(passed_waypoints.begin(), upcoming_waypoints.begin(), upcoming_waypoints.end());
+          //   passed_waypoints.clear();
+          //   //upcoming_waypoints = passed_waypoints; // I suspect this won't work because of pointers
+          //   //upcoming_waypoints.insert(upcoming_waypoints.begin(), passed_waypoints.begin(), passed_waypoints.end());
+          //   //passed_waypoints.clear();
+          //   break;
+          // }
+          
           this->translation_.UpdateRoutePolylineImpl(upcoming_waypoints);
 
               
