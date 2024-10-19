@@ -4,6 +4,9 @@
 
 ## What our version adds:
 - Route visualization pulled from a file (in alpha)
+- Disengagement warning alerts (based on custom Carla Town environment)
+- Disengagement warning visualizations on the road
+- Automation status banner
 
 Visualize carla in the web browser.
 
