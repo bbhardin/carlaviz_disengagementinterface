@@ -42,3 +42,6 @@ Please read [this](./CONTRIBUTION.md).
 [Minjun Xu](https://github.com/mjxu96)   mjxu96@outlook.com
 
 Please contact me via email if you want more collaborations.
+
+This fork is built by [Ben Hardin](https://github.com/bbhardin)
+
