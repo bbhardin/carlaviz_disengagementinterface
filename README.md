@@ -8,6 +8,9 @@
 - Disengagement warning visualizations on the road
 - Automation status banner
 
+
+## CarlaViz Overview
+
 Visualize carla in the web browser.
 
 ![nothing](./docs//images/demo2.jpg)
